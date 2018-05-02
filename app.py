@@ -35,4 +35,4 @@ def handle_my_custom_event(json):
 
 if __name__ == '__main__':
     RUNNING = False
-    socketio.run(app, host=8080)
+    socketio.run(app, port=8080)
