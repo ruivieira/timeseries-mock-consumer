@@ -19,7 +19,7 @@
     let options = {
         title: "Downloads",
         description: "This graphic shows a time-series of downloads.",
-        data: [[{'x':0, 'y':0}]],
+        data: [[]],
         width: 600,
         height: 250,
         chart_type: 'point',
@@ -29,7 +29,7 @@
         x_sort: false
     };
 
-    MG.data_graphic(options);
+    {#MG.data_graphic(options);#}
 
     const UPDATE_EVENT = 'my event';
     socket.on(UPDATE_EVENT, function() {
@@ -40,6 +40,13 @@
     socket.on(UPDATE_EVENT, (data) => {
         i += 1;
         console.log(data);
+
+        // FIFO queue observations
+
+        if (options.data[0].length === 200) {
+            options.data[0].shift()
+        }
+
         options.data[0].push({'x': i, 'y': parseFloat(data) });
 
         MG.data_graphic(options);

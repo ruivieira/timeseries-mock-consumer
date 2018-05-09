@@ -12,7 +12,7 @@ thread = None
 
 
 def run_job():
-    consumer = KafkaConsumer('bones-brigade', bootstrap_servers='kafka:9092')
+    consumer = KafkaConsumer('example', bootstrap_servers='localhost:9092')
     for msg in consumer:
         print('Doing something imporant in the background')
         socketio.emit(UPDATE_EVENT, str(msg.value, 'utf-8'))
