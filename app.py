@@ -13,11 +13,13 @@ app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
 UPDATE_EVENT = 'my event'
+BROKER = 'localhost:9092'
 thread = None
 
 
 def run_job():
-    consumer = KafkaConsumer('example', bootstrap_servers='localhost:9092')
+    global BROKER
+    consumer = KafkaConsumer('example', bootstrap_servers=BROKER)
     for msg in consumer:
         print(str(msg.value, 'utf-8'))
         # socketio.emit(UPDATE_EVENT, json.loads(str(msg.value, 'utf-8')))
@@ -53,6 +55,8 @@ def main(args):
     logging.info('brokers={}'.format(args.brokers))
     logging.info('topic={}'.format(args.topic))
     logging.info('port={}'.format(args.port))
+    global BROKER
+    BROKER = args.brokers
     thread = threading.Thread(target=run_job)
     thread.start()
 
