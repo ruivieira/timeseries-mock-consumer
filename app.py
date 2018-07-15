@@ -1,44 +1,14 @@
-import json
-
-from flask import Flask, render_template
-from flask_socketio import SocketIO
-import threading
 from kafka import KafkaConsumer
 import logging
 import argparse
 import os
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
 
-UPDATE_EVENT = 'my event'
-BROKER = 'localhost:9092'
-thread = None
-
-
-def run_job():
-    global BROKER
-    consumer = KafkaConsumer('example', bootstrap_servers=BROKER)
+def run_job(broker):
+    consumer = KafkaConsumer('example', bootstrap_servers=broker)
     for msg in consumer:
         print(str(msg.value, 'utf-8'))
-        # socketio.emit(UPDATE_EVENT, json.loads(str(msg.value, 'utf-8')))
 
-
-@app.route('/')
-def hello_world():
-    global thread
-    if not thread:
-        thread = threading.Thread(target=run_job)
-        thread.start()
-
-    return render_template('index.html')
-
-
-@socketio.on(UPDATE_EVENT)
-def handle_my_custom_event(json):
-    # print('received json: ' + str(json))
-    pass
 
 def get_arg(env, default):
     return os.getenv(env) if os.getenv(env, '') is not '' else default
@@ -51,16 +21,12 @@ def parse_args(parser):
     args.conf = get_arg('PORT', args.port)
     return args
 
+
 def main(args):
     logging.info('brokers={}'.format(args.brokers))
     logging.info('topic={}'.format(args.topic))
     logging.info('port={}'.format(args.port))
-    global BROKER
-    BROKER = args.brokers
-    thread = threading.Thread(target=run_job)
-    thread.start()
-
-    socketio.run(app, host='0.0.0.0', port=args.port)
+    run_job(args.brokers)
 
 
 if __name__ == '__main__':
